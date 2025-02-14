@@ -1,20 +1,12 @@
-[![XX](https://img.shields.io/badge/XX-github-blue?logo=github)](https://github.com/XX)
+[![XX](https://img.shields.io/badge/XX-github-blue?logo=github)](https://github.com/stonehfzs)
 
-I'm currently pursuing a Master's degree in XX at the Department of XX, XX University, XX.
+I'm currently studying mathematics and applied mathematics in Ocean University of China in Qingdao, Shandong Province, China, now mainly interested in matrix computing and its implementations. 
+I'm also interested in machine learning, statistical methods and high performance computing and trying to learn deep.
 
 #### Email  
-<code>XX@XX.XX</code>  
-<code>XX@XX.XX</code>
+<code>sunjingu@stu.ouc.edu.cn</code>
 
 #### Education  
-**XX University**, Master of XX (XX – XX)  
-• GPA: XX/XX  
-
-**XX University**, Exchange student <br>  
-• As a XX, represented my college as an outstanding student for a XX exchange program.  
-
-**XX University**, Honours Bachelor of XX (XX – XX)  
-• GPA: XX/XX (top XX%)  
-
-#### Research Interests  
-XX, XX, XX, XX.
+**Ocean University of China**, Bachelor of Science (2023 – 2027(Expected))  
+• GPA: 3.87/4.00 (Currently)  
+• Rank: 3/137 (Currently)  
