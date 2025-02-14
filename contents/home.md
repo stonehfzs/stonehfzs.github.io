@@ -1,6 +1,6 @@
 [![stonehfzs](https://img.shields.io/badge/stonehfzs-github-blue?logo=github)](https://github.com/stonehfzs)
 
-I'm currently studying mathematics and applied mathematics in Ocean University of China in Qingdao, Shandong Province, China, now mainly interested in matrix computing and its implementations. 
+I'm Jingyu Sun, also called Stone, currently studying mathematics and applied mathematics in Ocean University of China in Qingdao, Shandong Province, China, now mainly interested in matrix computing and its implementations. 
 I'm also interested in machine learning, statistical methods and high performance computing and trying to learn deep.
 
 #### Email  
