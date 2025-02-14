@@ -3,7 +3,7 @@
 
 Based on OneDrive and many sources supporting, I help design and develop the platform to help study both theoritical mathematics and applied mathematics.
 
--
+---
 
 
 ### **Local Aritifical Intelligence related with Campus (SRDP)**  
@@ -11,7 +11,7 @@ Based on OneDrive and many sources supporting, I help design and develop the pla
 
 To find out how AI could assist daily life in universities, we develop this program to establish a platform and help aggregator information from the campus.
 
--
+---
 
 ### **Summer Teaching Support Project**  
 **Augest 2024 | Dezhou, Shandong Province | Team Member**  
