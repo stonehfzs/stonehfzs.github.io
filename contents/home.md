@@ -5,8 +5,9 @@ I'm also interested in machine learning, statistical methods and high performanc
 
 #### Education  
 **Ocean University of China**, Bachelor of Science (2023 – 2027(Expected))  
-• GPA: 3.87/4.00 (Currently)  
-• Rank: 3/137 (Currently)  
+• GPA: 3.87/4.00 (Currently)
+• Grades: 92.70/100 (Currently)
+• Rank: 3/137 (Currently) 
 
 [![](https://img.shields.io/badge/stonehfzs-Github-blue?logo=github)](https://github.com/stonehfzs)
 [![](https://img.shields.io/badge/Email-Address-76BB21?logo=mailboxdotorg)](sunjingu@stu.ouc.edu.cn)
