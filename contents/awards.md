@@ -1,3 +1,3 @@
-- 校级一等奖学金, 2022.  
-
-- Outstanding Graduation Thesis, XXX University, 2023. 
+- Excellent Student in Ocean University of China, 2023-2024.
+- First Class Scholarship in Ocean University of China, 2023-2024.
+- National Scholarship, 2023-2024.
