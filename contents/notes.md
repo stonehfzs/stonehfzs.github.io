@@ -5,11 +5,11 @@ I'm also planning to set up seminars for bachelors with some mates, the material
 
 ## 2024 Fall
 
-**[2024 Fall Mathematical Analysis &#8546; Lecture Notes](notes/2024_Fall_MA3.pdf)**
+**[2024 Fall Mathematical Analysis &#8546; Lecture Notes](https://stonehfzs.github.io/notes/2024_Fall_MA3.pdf)**
 
-**[2024 Fall Ordinary Differential Equations Lecture Notes](notes/2024_Fall_ODE.pdf)**
+**[2024 Fall Ordinary Differential Equations Lecture Notes](https://stonehfzs.github.io/notes/2024_Fall_ODE.pdf)**
 
-**[2024 Fall Probability & Statistics Lecture Notes (Not Recommended)](notes/2024_Fall_PnS.pdf)**
+**[2024 Fall Probability & Statistics Lecture Notes (Not Recommended)](https://stonehfzs.github.io/notes/2024_Fall_PnS.pdf)**
 
 ## Remark
 Not recommended means the material is not well organized or I'm not fully satisfied with the sturcture of the notes.
