@@ -11,7 +11,7 @@ I'm also interested in machine learning, statistical methods and high performanc
 
 #### Email
 
-<code>sunjingu@stu.ouc.edu.cn<code>
+<code>sunjingu@stu.ouc.edu.cn</code>
 
 #### Contact
 [![](https://img.shields.io/badge/stonehfzs-Github-blue?logo=github)](https://github.com/stonehfzs)
