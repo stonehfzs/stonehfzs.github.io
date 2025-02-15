@@ -13,17 +13,23 @@ For courses before 2024 Fall, the notes are not updated so other materials are p
 
 **[2024 Fall Probability & Statistics Lecture Notes (Not Recommended)](https://stonehfzs.github.io/notes/2024_Fall_PnS.pdf)**
 
+---
+
 ## 2024 Spring
 
-**[2024 Spring Mathematical Analysis &#8545; Course Material](https://stonehfzs.github.io/course/2024-Spring-MA2.html)**
+<!--**[2024 Spring Mathematical Analysis &#8545; Course Material](https://stonehfzs.github.io/course/2024-Spring-MA2.html)**
 
-**[2024 Spring Linear Algebra &#8545; Course Material](https://stonehfzs.github.io/course/2024-Sprng-LA2.html)**
+**[2024 Spring Linear Algebra &#8545; Course Material](https://stonehfzs.github.io/course/2024-Sprng-LA2.html)**-->
+
+---
 
 ## 2023 Fall
 
-**[2023 Fall Mathematical Analysis &#8544; Course Material](https://stonehfzs.github.io/course/2023-Fall-MA1.html)**
+<!--**[2023 Fall Mathematical Analysis &#8544; Course Material](https://stonehfzs.github.io/course/2023-Fall-MA1.html)**
 
-**[2023 Fall Linear Algebra &#8544; Course Material](https://stonehfzs.github.io/course/2023-Fall-LA1.html)**
+**[2023 Fall Linear Algebra &#8544; Course Material](https://stonehfzs.github.io/course/2023-Fall-LA1.html)**-->
+
+---
 
 ## Remark
 Not recommended means the material is not well organized or I'm not fully satisfied with the sturcture of the notes.
