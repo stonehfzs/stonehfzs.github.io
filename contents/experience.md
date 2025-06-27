@@ -1,3 +1,11 @@
+### **2025 Spring Teaching Assistant**  
+**February 2025 - June 2025 | Ocean University of China, School of Mathematical Science | C Program Designing**  
+
+As a basic course supporting programming for mathematical students, I provide detailed practical guide and useful learning sources.
+
+---
+
+
 ### **Source Sharing Platform**  
 **October 2024 - Long Term | Ocean University of China | Tech Support**  
 
