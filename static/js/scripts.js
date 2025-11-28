@@ -48,19 +48,44 @@ window.addEventListener('DOMContentLoaded', event => {
     // Marked
     marked.use({ mangle: false, headerIds: false })
     section_names.forEach((name, idx) => {
+        // Special handling for blog
+        if (name === 'blog') {
+            const sidebarElement = document.getElementById('blog-sidebar');
+            const contentElement = document.getElementById('blog-content');
+            
+            if (sidebarElement && contentElement) {
+                // Load Sidebar
+                fetch(content_dir + 'blog/sidebar.md')
+                    .then(response => response.text())
+                    .then(markdown => {
+                        sidebarElement.innerHTML = marked.parse(markdown);
+                    });
+
+                // Load Content
+                const urlParams = new URLSearchParams(window.location.search);
+                const post = urlParams.get('post');
+                let filename = 'blog/index.md';
+                if (post) {
+                    filename = 'blog/' + post + '.md';
+                }
+
+                fetch(content_dir + filename)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.text();
+                    })
+                    .then(markdown => {
+                        contentElement.innerHTML = marked.parse(markdown);
+                    })
+                    .then(() => MathJax.typeset())
+                    .catch(error => console.log(error));
+            }
+            return; // Skip default logic for blog
+        }
+
         const element = document.getElementById(name + '-md');
         if (element) {
             let filename = name + '.md';
-            if (name === 'blog') {
-                const urlParams = new URLSearchParams(window.location.search);
-                const post = urlParams.get('post');
-                if (post) {
-                    filename = 'blog/' + post + '.md';
-                } else {
-                    filename = 'blog/index.md';
-                }
-            }
-
             fetch(content_dir + filename)
                 .then(response => {
                     if (!response.ok) {
