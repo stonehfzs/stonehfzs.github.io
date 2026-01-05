@@ -238,5 +238,32 @@ section .main-body{
     z-index: 1;
 }
 
+/* Latest Blogs Styling */
+.border-start-primary {
+    border-left: 4px solid var(--bs-primary) !important;
+}
+
+.list-group-item-action:hover {
+    background-color: var(--bs-gray-100);
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Blog Sidebar Date/Title Styling */
+.blog-title {
+    display: block;
+    line-height: 1.4;
+}
+
+.blog-date {
+    display: block;
+    font-size: 0.85em;
+}
+
+#blog-sidebar a.active .blog-date {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
 
 

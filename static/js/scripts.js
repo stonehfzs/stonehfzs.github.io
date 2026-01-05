@@ -65,6 +65,45 @@ window.addEventListener('DOMContentLoaded', event => {
     });
 
 
+    // Latest Blogs on Index
+    const latestBlogsElement = document.getElementById('latest-blogs');
+    if (latestBlogsElement) {
+        fetch(content_dir + 'blog/sidebar.md')
+            .then(response => response.text())
+            .then(markdown => {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = marked.parse(markdown);
+                const links = Array.from(tempDiv.querySelectorAll('a')).slice(0, 2);
+                
+                if (links.length > 0) {
+                    let html = '<h3 class="mb-4 fw-bold text-primary">Latest Blogs</h3><div class="list-group shadow-sm">';
+                    links.forEach(link => {
+                        const text = link.textContent;
+                        const href = link.getAttribute('href');
+                        const match = text.match(/^(\d{4}-\d{2}-\d{2}):\s*(.+)$/);
+                        let date = '';
+                        let title = text;
+                        if (match) {
+                            date = match[1];
+                            title = match[2];
+                        }
+                        
+                        html += `
+                            <a href="${href}" class="list-group-item list-group-item-action p-4 border-start-primary">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <h5 class="mb-1 fw-bold text-dark">${title}</h5>
+                                    <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>${date}</small>
+                                </div>
+                            </a>
+                        `;
+                    });
+                    html += '</div>';
+                    latestBlogsElement.innerHTML = html;
+                }
+            })
+            .catch(error => console.log(error));
+    }
+
     // Yaml
     fetch(content_dir + config_file)
         .then(response => response.text())
@@ -98,11 +137,28 @@ window.addEventListener('DOMContentLoaded', event => {
                         sidebarElement.innerHTML = marked.parse(markdown);
                         addCopyButtons(sidebarElement);
 
+                        // Format sidebar links
+                        const links = sidebarElement.querySelectorAll('a');
+                        links.forEach(link => {
+                            const text = link.textContent;
+                            // Match "YYYY-MM-DD: Title"
+                            const match = text.match(/^(\d{4}-\d{2}-\d{2}):\s*(.+)$/);
+                            if (match) {
+                                const date = match[1];
+                                const title = match[2];
+                                link.innerHTML = `
+                                    <div class="d-flex flex-column">
+                                        <span class="blog-title fw-bold">${title}</span>
+                                        <span class="blog-date small text-muted mt-1"><i class="bi bi-calendar3 me-1"></i>${date}</span>
+                                    </div>
+                                `;
+                            }
+                        });
+
                         // Highlight active link
                         const urlParams = new URLSearchParams(window.location.search);
                         const currentPost = urlParams.get('post');
                         if (currentPost) {
-                            const links = sidebarElement.querySelectorAll('a');
                             links.forEach(link => {
                                 if (link.getAttribute('href').includes('post=' + currentPost)) {
                                     link.classList.add('active');
