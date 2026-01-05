@@ -183,6 +183,48 @@ window.addEventListener('DOMContentLoaded', event => {
                     .then(markdown => {
                         contentElement.innerHTML = marked.parse(markdown);
                         addCopyButtons(contentElement);
+
+                        // Add Share Button
+                        const shareDiv = document.createElement('div');
+                        shareDiv.className = 'mt-5 pt-4 border-top';
+                        
+                        const shareBtn = document.createElement('button');
+                        shareBtn.className = 'btn btn-outline-primary';
+                        shareBtn.innerHTML = '<i class="bi bi-share-fill me-2"></i>Share this post';
+                        
+                        shareBtn.addEventListener('click', () => {
+                            // Get title from the first h1, or use document title if not found
+                            let title = document.title;
+                            const h1 = contentElement.querySelector('h1');
+                            if (h1) {
+                                title = h1.innerText;
+                            } else {
+                                // Fallback: try to find title from sidebar active link
+                                const activeLink = document.querySelector('#blog-sidebar a.active .blog-title');
+                                if (activeLink) {
+                                    title = activeLink.innerText;
+                                }
+                            }
+                            
+                            const url = window.location.href;
+                            const textToCopy = `${title}\n${url}`;
+                            
+                            navigator.clipboard.writeText(textToCopy).then(() => {
+                                const originalHtml = shareBtn.innerHTML;
+                                shareBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Copied!';
+                                shareBtn.classList.replace('btn-outline-primary', 'btn-success');
+                                
+                                setTimeout(() => {
+                                    shareBtn.innerHTML = originalHtml;
+                                    shareBtn.classList.replace('btn-success', 'btn-outline-primary');
+                                }, 2000);
+                            }).catch(err => {
+                                console.error('Failed to copy:', err);
+                            });
+                        });
+                        
+                        shareDiv.appendChild(shareBtn);
+                        contentElement.appendChild(shareDiv);
                     })
                     .then(() => MathJax.typeset())
                     .catch(error => console.log(error));
