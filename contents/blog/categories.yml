@@ -17,4 +17,22 @@ categories:
     name: Journal
     icon: bi-journal-bookmark
     color: "#00a8c6"
-    description: Updates, ideas and things worth remembering.
+    description: Daily notes, updates and moments worth keeping.
+
+  - id: essay
+    name: Essays
+    icon: bi-pen
+    color: "#f59e0b"
+    description: Observations, inspirations and fragments of everyday life.
+
+  - id: reflection
+    name: Reflections
+    icon: bi-lightbulb
+    color: "#ec4899"
+    description: Personal thoughts on experiences, reading and ideas.
+
+  - id: other
+    name: Other
+    icon: bi-three-dots
+    color: "#64748b"
+    description: Posts that do not fit into the other topics yet.
