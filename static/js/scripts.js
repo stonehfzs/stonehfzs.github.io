@@ -124,6 +124,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 <div class="sidebar-label">Recent entries</div>
                 <nav class="recent-list">
                     ${posts.slice(0, 5).map(post => `<a href="blog.html?post=${encodeURIComponent(post.slug)}"
+                        title="${escapeHtml(post.title)}"
                         class="recent-link ${activePost === post.slug ? 'active' : ''}">
                         <span>${escapeHtml(post.title)}</span><time>${escapeHtml(post.date)}</time>
                     </a>`).join('')}
