@@ -1,0 +1,20 @@
+default_category: all
+
+# The browser uses this list to discover posts on GitHub Pages.
+# Add the filename (without .md) here whenever a new post is published.
+posts:
+  - "2026-01-05"
+  - "2025-11-28"
+
+categories:
+  - id: tech
+    name: Technology
+    icon: bi-cpu
+    color: "#6d5dfc"
+    description: Development, self-hosting and technical notes.
+
+  - id: journal
+    name: Journal
+    icon: bi-journal-bookmark
+    color: "#00a8c6"
+    description: Updates, ideas and things worth remembering.

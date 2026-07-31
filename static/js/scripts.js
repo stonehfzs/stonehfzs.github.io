@@ -1,18 +1,27 @@
-const content_dir = 'contents/'
-const config_file = 'config.yml'
-const section_names = ['index', 'about', 'awards', 'experience', 'notes', 'blog'];
+const contentDir = 'contents/';
+const configFile = 'config.yml';
+const sectionNames = ['index', 'about', 'awards', 'experience', 'notes'];
 
+window.addEventListener('DOMContentLoaded', () => {
+    marked.use({ mangle: false, headerIds: false });
 
-window.addEventListener('DOMContentLoaded', event => {
+    const escapeHtml = value => String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
 
-    // Function to add copy buttons to code blocks
+    const fetchText = async path => {
+        const response = await fetch(path);
+        if (!response.ok) throw new Error(`Could not load ${path} (${response.status})`);
+        return response.text();
+    };
+
     function addCopyButtons(container) {
         if (!container) return;
-        const preTags = container.querySelectorAll('pre');
-        preTags.forEach(pre => {
-            // Check if already wrapped
+        container.querySelectorAll('pre').forEach(pre => {
             if (pre.parentNode.classList.contains('code-wrapper')) return;
-
             const wrapper = document.createElement('div');
             wrapper.className = 'code-wrapper';
             pre.parentNode.insertBefore(wrapper, pre);
@@ -20,238 +29,253 @@ window.addEventListener('DOMContentLoaded', event => {
 
             const button = document.createElement('button');
             button.className = 'copy-button';
+            button.type = 'button';
             button.textContent = 'Copy';
-            
-            button.addEventListener('click', () => {
-                const code = pre.querySelector('code');
-                const text = code ? code.innerText : pre.innerText;
-                
-                navigator.clipboard.writeText(text).then(() => {
-                    const originalText = button.textContent;
+            button.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(pre.querySelector('code')?.innerText || pre.innerText);
                     button.textContent = 'Copied!';
-                    setTimeout(() => {
-                        button.textContent = 'Copy';
-                    }, 2000);
-                }).catch(err => {
-                    console.error('Failed to copy:', err);
+                    setTimeout(() => { button.textContent = 'Copy'; }, 2000);
+                } catch (error) {
+                    console.error('Failed to copy:', error);
                     button.textContent = 'Error';
-                });
+                }
             });
-            
             wrapper.appendChild(button);
         });
     }
 
-    // Activate Bootstrap scrollspy on the main nav element
-    const mainNav = document.body.querySelector('#mainNav');
-    if (mainNav) {
-        new bootstrap.ScrollSpy(document.body, {
-            target: '#mainNav',
-            offset: 74,
-        });
-    };
+    function parsePost(markdown, slug) {
+        const match = markdown.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?/);
+        let metadata = {};
+        let body = markdown;
+        if (match) {
+            metadata = jsyaml.load(match[1]) || {};
+            body = markdown.slice(match[0].length);
+        }
 
-    // Collapse responsive navbar when toggler is visible
-    const navbarToggler = document.body.querySelector('.navbar-toggler');
-    const responsiveNavItems = [].slice.call(
-        document.querySelectorAll('#navbarResponsive .nav-link')
-    );
-    responsiveNavItems.map(function (responsiveNavItem) {
-        responsiveNavItem.addEventListener('click', () => {
-            if (window.getComputedStyle(navbarToggler).display !== 'none') {
-                navbarToggler.click();
-            }
-        });
-    });
+        const heading = body.match(/^#\s+(.+)$/m);
+        const rawDate = metadata.date instanceof Date
+            ? metadata.date.toISOString().slice(0, 10)
+            : String(metadata.date || slug);
 
-
-    // Latest Blogs on Index
-    const latestBlogsElement = document.getElementById('latest-blogs');
-    if (latestBlogsElement) {
-        fetch(content_dir + 'blog/sidebar.md')
-            .then(response => response.text())
-            .then(markdown => {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = marked.parse(markdown);
-                const links = Array.from(tempDiv.querySelectorAll('a')).slice(0, 2);
-                
-                if (links.length > 0) {
-                    let html = '<h3 class="mb-4 fw-bold text-primary">Latest Blogs</h3><div class="list-group shadow-sm">';
-                    links.forEach(link => {
-                        const text = link.textContent;
-                        const href = link.getAttribute('href');
-                        const match = text.match(/^(\d{4}-\d{2}-\d{2}):\s*(.+)$/);
-                        let date = '';
-                        let title = text;
-                        if (match) {
-                            date = match[1];
-                            title = match[2];
-                        }
-                        
-                        html += `
-                            <a href="${href}" class="list-group-item list-group-item-action p-4 border-start-primary">
-                                <div class="d-flex w-100 justify-content-between align-items-center">
-                                    <h5 class="mb-1 fw-bold text-dark">${title}</h5>
-                                    <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>${date}</small>
-                                </div>
-                            </a>
-                        `;
-                    });
-                    html += '</div>';
-                    latestBlogsElement.innerHTML = html;
-                }
-            })
-            .catch(error => console.log(error));
+        return {
+            slug,
+            title: String(metadata.title || heading?.[1] || slug),
+            date: rawDate,
+            category: String(metadata.category || 'uncategorized'),
+            description: String(metadata.description || ''),
+            body
+        };
     }
 
-    // Yaml
-    fetch(content_dir + config_file)
+    let blogLibraryPromise;
+    function loadBlogLibrary() {
+        if (!blogLibraryPromise) {
+            blogLibraryPromise = fetchText(contentDir + 'blog/categories.yml')
+                .then(text => jsyaml.load(text) || {})
+                .then(async config => {
+                    const categories = Array.isArray(config.categories) ? config.categories : [];
+                    const slugs = Array.isArray(config.posts) ? config.posts.map(String) : [];
+                    const results = await Promise.allSettled(slugs.map(async slug =>
+                        parsePost(await fetchText(`${contentDir}blog/${slug}.md`), slug)
+                    ));
+                    const posts = results
+                        .filter(result => result.status === 'fulfilled')
+                        .map(result => result.value)
+                        .sort((a, b) => b.date.localeCompare(a.date));
+                    results.filter(result => result.status === 'rejected')
+                        .forEach(result => console.error(result.reason));
+                    return { categories, posts, defaultCategory: String(config.default_category || 'all') };
+                });
+        }
+        return blogLibraryPromise;
+    }
+
+    const getCategory = (categories, id) => categories.find(category => String(category.id) === id);
+
+    function categoryBadge(category) {
+        if (!category) return '';
+        return `<span class="post-category" style="--category-color:${escapeHtml(category.color || '#6d5dfc')}">
+            <i class="bi ${escapeHtml(category.icon || 'bi-folder')}"></i>${escapeHtml(category.name)}
+        </span>`;
+    }
+
+    function renderSidebar(element, library, selectedCategory, activePost) {
+        const { categories, posts } = library;
+        const categoryItems = [{ id: 'all', name: 'All posts', icon: 'bi-grid', color: '#6d5dfc' }, ...categories];
+        element.innerHTML = `
+            <div class="sidebar-panel">
+                <div class="sidebar-label">Explore</div>
+                <nav class="category-list">
+                    ${categoryItems.map(category => {
+                        const id = String(category.id);
+                        const count = id === 'all' ? posts.length : posts.filter(post => post.category === id).length;
+                        return `<a class="category-link ${selectedCategory === id ? 'active' : ''}"
+                            href="blog.html${id === 'all' ? '' : `?category=${encodeURIComponent(id)}`}"
+                            style="--category-color:${escapeHtml(category.color || '#6d5dfc')}">
+                            <span><i class="bi ${escapeHtml(category.icon || 'bi-folder')}"></i>${escapeHtml(category.name)}</span>
+                            <strong>${count}</strong>
+                        </a>`;
+                    }).join('')}
+                </nav>
+            </div>
+            <div class="sidebar-panel recent-panel">
+                <div class="sidebar-label">Recent entries</div>
+                <nav class="recent-list">
+                    ${posts.slice(0, 5).map(post => `<a href="blog.html?post=${encodeURIComponent(post.slug)}"
+                        class="recent-link ${activePost === post.slug ? 'active' : ''}">
+                        <span>${escapeHtml(post.title)}</span><time>${escapeHtml(post.date)}</time>
+                    </a>`).join('')}
+                </nav>
+            </div>`;
+    }
+
+    function renderArchive(element, library, selectedCategory) {
+        const category = selectedCategory === 'all' ? null : getCategory(library.categories, selectedCategory);
+        const posts = selectedCategory === 'all'
+            ? library.posts
+            : library.posts.filter(post => post.category === selectedCategory);
+        const title = category?.name || 'All posts';
+        const description = category?.description || 'Browse the complete collection, organized by topic.';
+
+        element.innerHTML = `
+            <section class="archive-hero">
+                <div>
+                    <span class="archive-kicker">${category ? 'CATEGORY' : 'BLOG ARCHIVE'}</span>
+                    <h1>${escapeHtml(title)}</h1>
+                    <p>${escapeHtml(description)}</p>
+                </div>
+                <div class="archive-count"><strong>${posts.length}</strong><span>${posts.length === 1 ? 'article' : 'articles'}</span></div>
+            </section>
+            <div class="post-grid">
+                ${posts.length ? posts.map(post => {
+                    const postCategory = getCategory(library.categories, post.category);
+                    return `<article class="post-card">
+                        <div class="post-card-meta">${categoryBadge(postCategory)}<time>${escapeHtml(post.date)}</time></div>
+                        <h2><a href="blog.html?post=${encodeURIComponent(post.slug)}">${escapeHtml(post.title)}</a></h2>
+                        <p>${escapeHtml(post.description || 'Open this entry to continue reading.')}</p>
+                        <a class="post-read-more" href="blog.html?post=${encodeURIComponent(post.slug)}">Read article <i class="bi bi-arrow-up-right"></i></a>
+                    </article>`;
+                }).join('') : '<div class="blog-empty"><i class="bi bi-inbox"></i><h2>No posts yet</h2><p>This category is ready for its first entry.</p></div>'}
+            </div>`;
+    }
+
+    function addShareButton(element, post) {
+        const share = document.createElement('div');
+        share.className = 'article-actions';
+        const button = document.createElement('button');
+        button.className = 'share-button';
+        button.type = 'button';
+        button.innerHTML = '<i class="bi bi-share"></i><span>Share article</span>';
+        button.addEventListener('click', async () => {
+            try {
+                if (navigator.share) {
+                    await navigator.share({ title: post.title, url: window.location.href });
+                } else {
+                    await navigator.clipboard.writeText(`${post.title}\n${window.location.href}`);
+                    button.innerHTML = '<i class="bi bi-check2"></i><span>Link copied</span>';
+                    setTimeout(() => { button.innerHTML = '<i class="bi bi-share"></i><span>Share article</span>'; }, 2000);
+                }
+            } catch (error) {
+                if (error.name !== 'AbortError') console.error('Failed to share:', error);
+            }
+        });
+        share.appendChild(button);
+        element.appendChild(share);
+    }
+
+    async function renderBlog() {
+        const sidebar = document.getElementById('blog-sidebar');
+        const content = document.getElementById('blog-content');
+        if (!sidebar || !content) return;
+
+        try {
+            const library = await loadBlogLibrary();
+            const params = new URLSearchParams(window.location.search);
+            const postSlug = params.get('post');
+            const requestedCategory = params.get('category') || library.defaultCategory;
+            const validCategory = requestedCategory === 'all' || getCategory(library.categories, requestedCategory);
+            const selectedCategory = validCategory ? requestedCategory : 'all';
+            const post = postSlug ? library.posts.find(item => item.slug === postSlug) : null;
+
+            renderSidebar(sidebar, library, post ? post.category : selectedCategory, post?.slug);
+            if (postSlug && !post) {
+                content.innerHTML = '<div class="blog-empty"><i class="bi bi-exclamation-diamond"></i><h1>Post not found</h1><p>The requested article is not listed in the blog configuration.</p><a href="blog.html">Return to the archive</a></div>';
+                return;
+            }
+            if (!post) {
+                renderArchive(content, library, selectedCategory);
+                return;
+            }
+
+            const category = getCategory(library.categories, post.category);
+            content.innerHTML = `<article class="blog-article">
+                <a class="article-back" href="blog.html${category ? `?category=${encodeURIComponent(post.category)}` : ''}"><i class="bi bi-arrow-left"></i> Back to ${escapeHtml(category?.name || 'all posts')}</a>
+                <header class="article-header">
+                    <div class="article-meta">${categoryBadge(category)}<time><i class="bi bi-calendar3"></i>${escapeHtml(post.date)}</time></div>
+                    <h1>${escapeHtml(post.title)}</h1>
+                    ${post.description ? `<p>${escapeHtml(post.description)}</p>` : ''}
+                </header>
+                <div class="article-body">${marked.parse(post.body)}</div>
+            </article>`;
+            addCopyButtons(content);
+            addShareButton(content.querySelector('.blog-article'), post);
+            document.title = `${post.title} · Blog`;
+            if (window.MathJax?.typesetPromise) await MathJax.typesetPromise([content]);
+        } catch (error) {
+            console.error(error);
+            sidebar.innerHTML = '';
+            content.innerHTML = '<div class="blog-empty"><i class="bi bi-wifi-off"></i><h1>Unable to load the blog</h1><p>Please refresh the page or try again later.</p></div>';
+        }
+    }
+
+    async function renderLatestBlogs() {
+        const element = document.getElementById('latest-blogs');
+        if (!element) return;
+        try {
+            const library = await loadBlogLibrary();
+            const posts = library.posts.slice(0, 2);
+            if (!posts.length) return;
+            element.innerHTML = `<h3 class="mb-4 fw-bold text-primary">Latest Blogs</h3><div class="list-group shadow-sm">
+                ${posts.map(post => `<a href="blog.html?post=${encodeURIComponent(post.slug)}" class="list-group-item list-group-item-action p-4 border-start-primary">
+                    <div class="d-flex w-100 justify-content-between align-items-center gap-3">
+                        <h5 class="mb-1 fw-bold text-dark">${escapeHtml(post.title)}</h5>
+                        <small class="text-muted text-nowrap"><i class="bi bi-calendar3 me-1"></i>${escapeHtml(post.date)}</small>
+                    </div>
+                </a>`).join('')}
+            </div>`;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const mainNav = document.body.querySelector('#mainNav');
+    if (mainNav) new bootstrap.ScrollSpy(document.body, { target: '#mainNav', offset: 74 });
+
+    fetch(contentDir + configFile)
         .then(response => response.text())
         .then(text => {
-            const yml = jsyaml.load(text);
-            Object.keys(yml).forEach(key => {
-                try {
-                    document.getElementById(key).innerHTML = yml[key];
-                } catch {
-                    console.log("Unknown id and value: " + key + "," + yml[key].toString())
-                }
-
-            })
+            const config = jsyaml.load(text);
+            Object.keys(config).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) element.innerHTML = config[key];
+            });
         })
-        .catch(error => console.log(error));
+        .catch(error => console.error(error));
 
-
-    // Marked
-    marked.use({ mangle: false, headerIds: false })
-    section_names.forEach((name, idx) => {
-        // Special handling for blog
-        if (name === 'blog') {
-            const sidebarElement = document.getElementById('blog-sidebar');
-            const contentElement = document.getElementById('blog-content');
-            
-            if (sidebarElement && contentElement) {
-                // Load Sidebar
-                fetch(content_dir + 'blog/sidebar.md')
-                    .then(response => response.text())
-                    .then(markdown => {
-                        sidebarElement.innerHTML = marked.parse(markdown);
-                        addCopyButtons(sidebarElement);
-
-                        // Format sidebar links
-                        const links = sidebarElement.querySelectorAll('a');
-                        links.forEach(link => {
-                            const text = link.textContent;
-                            // Match "YYYY-MM-DD: Title"
-                            const match = text.match(/^(\d{4}-\d{2}-\d{2}):\s*(.+)$/);
-                            if (match) {
-                                const date = match[1];
-                                const title = match[2];
-                                link.innerHTML = `
-                                    <div class="d-flex flex-column">
-                                        <span class="blog-title fw-bold">${title}</span>
-                                        <span class="blog-date small text-muted mt-1"><i class="bi bi-calendar3 me-1"></i>${date}</span>
-                                    </div>
-                                `;
-                            }
-                        });
-
-                        // Highlight active link
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const currentPost = urlParams.get('post');
-                        if (currentPost) {
-                            links.forEach(link => {
-                                if (link.getAttribute('href').includes('post=' + currentPost)) {
-                                    link.classList.add('active');
-                                }
-                            });
-                        }
-                    });
-
-                // Load Content
-                const urlParams = new URLSearchParams(window.location.search);
-                const post = urlParams.get('post');
-                let filename = 'blog/index.md';
-                if (post) {
-                    filename = 'blog/' + post + '.md';
-                }
-
-                fetch(content_dir + filename)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        return response.text();
-                    })
-                    .then(markdown => {
-                        contentElement.innerHTML = marked.parse(markdown);
-                        addCopyButtons(contentElement);
-
-                        // Add Share Button
-                        const shareDiv = document.createElement('div');
-                        shareDiv.className = 'mt-5 pt-4 border-top';
-                        
-                        const shareBtn = document.createElement('button');
-                        shareBtn.className = 'btn btn-outline-primary';
-                        shareBtn.innerHTML = '<i class="bi bi-share-fill me-2"></i>Share this post';
-                        
-                        shareBtn.addEventListener('click', () => {
-                            // Get title from the first h1, or use document title if not found
-                            let title = document.title;
-                            const h1 = contentElement.querySelector('h1');
-                            if (h1) {
-                                title = h1.innerText;
-                            } else {
-                                // Fallback: try to find title from sidebar active link
-                                const activeLink = document.querySelector('#blog-sidebar a.active .blog-title');
-                                if (activeLink) {
-                                    title = activeLink.innerText;
-                                }
-                            }
-                            
-                            const url = window.location.href;
-                            const textToCopy = `${title}\n${url}`;
-                            
-                            navigator.clipboard.writeText(textToCopy).then(() => {
-                                const originalHtml = shareBtn.innerHTML;
-                                shareBtn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Copied!';
-                                shareBtn.classList.replace('btn-outline-primary', 'btn-success');
-                                
-                                setTimeout(() => {
-                                    shareBtn.innerHTML = originalHtml;
-                                    shareBtn.classList.replace('btn-success', 'btn-outline-primary');
-                                }, 2000);
-                            }).catch(err => {
-                                console.error('Failed to copy:', err);
-                            });
-                        });
-                        
-                        shareDiv.appendChild(shareBtn);
-                        contentElement.appendChild(shareDiv);
-                    })
-                    .then(() => MathJax.typeset())
-                    .catch(error => console.log(error));
-            }
-            return; // Skip default logic for blog
-        }
-
+    sectionNames.forEach(name => {
         const element = document.getElementById(name + '-md');
-        if (element) {
-            let filename = name + '.md';
-            fetch(content_dir + filename)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .then(markdown => {
-                    const html = marked.parse(markdown);
-                    element.innerHTML = html;
-                    addCopyButtons(element);
-                }).then(() => {
-                    // MathJax
-                    MathJax.typeset();
-                })
-                .catch(error => console.log(error));
-        }
-    })
+        if (!element) return;
+        fetchText(contentDir + name + '.md')
+            .then(markdown => {
+                element.innerHTML = marked.parse(markdown);
+                addCopyButtons(element);
+                if (window.MathJax?.typesetPromise) return MathJax.typesetPromise([element]);
+            })
+            .catch(error => console.error(error));
+    });
 
-}); 
+    renderLatestBlogs();
+    renderBlog();
+});

@@ -170,15 +170,24 @@
     <!-- Blog -->
     <section class="mt5 md5" id="blog">
         <div class="container px-5">
-            <header>
-                <h2 id="blog-subtitle"><i class="bi bi-journal-text"></i>&nbsp;Blog</h2>
-            </header>
-            <div class="row">
-                <div class="col-md-3">
-                    <div id="blog-sidebar"></div>
+            <header class="blog-heading">
+                <div>
+                    <span class="blog-eyebrow">KNOWLEDGE BASE</span>
+                    <h2 id="blog-subtitle"><i class="bi bi-journal-code"></i>&nbsp;Blog</h2>
+                    <p>Notes on technology, research and everything in between.</p>
                 </div>
-                <div class="col-md-9">
-                    <div class="main-body" id="blog-content"></div>
+                <div class="blog-heading-orbit" aria-hidden="true"><span></span></div>
+            </header>
+            <div class="row g-4 blog-layout">
+                <div class="col-lg-4 col-xl-3">
+                    <aside id="blog-sidebar" aria-label="Blog categories">
+                        <div class="blog-loading"><span></span> Loading library...</div>
+                    </aside>
+                </div>
+                <div class="col-lg-8 col-xl-9">
+                    <main class="main-body" id="blog-content" aria-live="polite">
+                        <div class="blog-loading"><span></span> Loading posts...</div>
+                    </main>
                 </div>
             </div>
         </div>
