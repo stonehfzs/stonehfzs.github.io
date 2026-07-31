@@ -1,5 +1,5 @@
-# Sample workflow for building and deploying a Jekyll site to GitHub Pages
-name: Deploy Jekyll with GitHub Pages dependencies preinstalled
+# Deploy the repository as-is so the browser can fetch raw Markdown and YAML.
+name: Deploy static site to GitHub Pages
 
 on:
   # Runs on pushes targeting the default branch
@@ -22,21 +22,17 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Build job
+  # Package the static site without running Jekyll. Jekyll would transform
+  # Markdown files that contain front matter and remove their .md URLs.
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
-        with:
-          source: ./
-          destination: ./_site
-      - name: Upload artifact
+      - name: Upload static site artifact
         uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
 
   # Deployment job
   deploy:
