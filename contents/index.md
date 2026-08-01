@@ -2,4 +2,4 @@
 
 Welcome to my personal website!
 
-Here you can find information about my academic background, awards, experience, notes, and my blog.
+Explore my academic background, experience, awards, and study notes.
