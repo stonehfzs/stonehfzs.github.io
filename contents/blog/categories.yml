@@ -5,6 +5,7 @@ default_category: all
 posts:
   - "2026-01-05"
   - "2025-11-28"
+  - "2026-08-01"
 
 categories:
   - id: tech
